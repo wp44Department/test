@@ -1,0 +1,722 @@
+
+
+All jobs page
+
+==========================================================
+
+import wixData from 'wix-data';
+import {session} from 'wix-storage';
+// API Reference: https://www.wix.com/velo/reference/api-overview/introduction
+// “Hello, World!” Example: https://learn-code.wix.com/en/article/1-hello-world
+import wixUsers from 'wix-users';
+import { currentMember } from 'wix-members';
+
+//get current member email address
+$w.onReady(function () {
+	setTimeout( function(){
+		console.log(currentMember.getMember());
+		var email_id = currentMember.getMember();
+		console.log(email_id);
+		//session.setItem("email_id", email_id);
+	}, 100 )
+
+	
+});
+
+	
+
+export function searchbtn_click(event) {
+	
+}	
+$w.onReady(function () {
+	
+	
+});
+
+
+
+/**
+*	Adds an event handler that runs when the element is clicked.
+	[Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
+*	 @param {$w.MouseEvent} event
+*/
+// search functionality code
+export function btnsearch_click(event) {
+  // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
+  // Add your code for this event here: 
+  const searchinput = $w("#inputsearchJob").value;
+  const searchcity = $w("#searchcity").value;
+  let data;
+  if (searchinput.length>0 && searchcity.length>0){
+    getjobs(searchinput,searchcity).then((jobs) => {
+        console.log(jobs);
+        updateRepeaterWithQueryResults(jobs)
+        updateResultsTitle(jobs.length)
+    })
+  }
+}
+
+function getjobs(searchinput, searchcity){
+  const data = wixData.query("Team")
+    .contains('title',searchinput)
+	.and(
+		wixData.query("Team").contains("city", searchcity)
+	)
+    .find();
+
+    return data.then( results =>{
+		return results.items
+	}) 
+}
+
+function updateRepeaterWithQueryResults(jobs){
+  $w("#repeater1").data=jobs;
+}
+// filter data shown in reapeter
+export function repeater1_itemReady($item, itemData, index) {
+  $item("#imageX1").src = itemData.photo;
+  $item("#text13").text = itemData.title;	
+  $item("#button1").link = itemData['link-team-title'];
+}
+
+//code for adding search result found on page
+function updateResultsTitle(resultsLength){
+  $w('#totalresults').show();
+  if (resultsLength >0){
+    $w('#repeater1').show();
+   $w('#totalresults').text = resultsLength + ' results found'
+  }else{
+    $w('#repeater1').hide();
+    $w('#totalresults').text = 'No results found'
+  }
+}
+
+
+
+
+
+
+==================================================================
+panel
+=========================================================
+frontend code
+
+import { getTotalMembersCount } from 'backend/members.jsw';
+import { getTotalpostCount } from 'backend/posts.jsw';
+
+$w.onReady(() => {
+    getTotalMembersCount().then((totalNumber) => {
+        $w('#text56').text = `Registered Members: ${totalNumber}`;
+    })
+        getTotalpostCount().then((totalNumber) => {
+        $w('#text58').text = `Total Posts: ${totalNumber}`;
+    })
+})
+
+backend code
+
+// Backend: members.jsw;
+import wixData from 'wix-data';
+
+// Options to bypass the permissions.
+const options = { suppressAuth: true }
+
+export function getTotalMembersCount() {
+    return wixData.query('Members').find(options).then((x) => {
+        return x.totalCount;
+    })
+    
+}
+
+import wixData from 'wix-data';
+
+// Options to bypass the permissions.
+const options = { suppressAuth: true }
+
+export function getTotalpostCount() {
+    return wixData.query('Team').find(options).then((x) => {
+        return x.totalCount;
+    })
+    
+}
+
+=============================================================================
+
+apply now
+
+========================================================================
+
+frontnd
+
+// API Reference: https://www.wix.com/velo/reference/api-overview/introduction
+// “Hello, World!” Example: https://learn-code.wix.com/en/article/1-hello-world
+import {session} from 'wix-storage';
+//import wixUsers from 'wix-users';
+import wixData from 'wix-data';
+import wixLocation from 'wix-location'; 
+import {sendEmail, sendEmailWithRecipient} from 'backend/email';
+
+import wixUsers from 'wix-users';
+
+//console.log("userId");
+
+//let user = wixUsers.currentUser
+//let userID = user.id
+
+
+$w.onReady(function () {
+  // get email address from the single job page 
+  $w("#hidenEmailFields").hide();
+  //$w("#hiddenIdfield1").hide();
+
+  let value_employer_email_id = session.getItem("employer_email_id"); 
+  console.log( "Data From Page ", value_employer_email_id );
+
+  $w("#getCompanyEmail").text = value_employer_email_id;
+  $w("#hidenEmailFields").value = value_employer_email_id;
+  //$w("#hiddenIdfield1").value = $w("#EmpId").text;
+
+  //current user email address email address
+     let user = wixUsers.currentUser;
+        $w.onReady(async function () {
+        await user.getEmail()
+        .then( (email) => {
+        $w('#hiddenIdfield1').value = email; 
+    email = $w('#hiddenIdfield1').value;   
+    console.log($w('#hiddenIdfield1').value); 
+    console.log($w("#phonedropdown").value);
+
+    });
+     
+   })
+
+    //get the url of the page 
+  let url = wixLocation.url;
+    $w("#text12").text = url;
+  //let user = wixUsers.currentUser;
+  //let userId = user.id;
+  //let userId = user.getEmail().then((email)=> $w('#hiddenIdfield1').value = email )
+  //$w('#hiddenIdfield1').value = userId;
+  //console.log('login email id is '+ userId);
+  //$w('#hiddenIdfield1').value = userId;
+
+
+     
+});
+
+
+
+
+  // Write your JavaScript here
+
+  // To select an element by ID use: $w('#elementID')
+
+  // Click 'Preview' to run your code
+
+
+    
+     //const item =$w("#EMPresume").value;
+     //console.log( "item", item );
+     //return false;
+      //const item = $w("#dataset1").getCurrentItem();
+       //sendFormData(); 
+
+
+$w.onReady(function () {
+  $w("#dataset1").onAfterSave(sendFormData);
+ // $w("#dataset1").save();
+  //TODO: write your page related code here...
+});
+// send mail using sandgrid
+function sendFormData() {
+
+  const convertRegex = new RegExp(/wix:document:\/\/v1\/([^\/]+)\/(.*)$/);
+  const item = $w("#dataset1").getCurrentItem();
+  
+  //const matches = sendFormData.item.match(convertregex);  
+  
+  
+  const matchesresume = item.resume.match(convertRegex);
+  const documentUrl = `https://docs.wixstatic.com/ugd/${matchesresume[1]}?dn=${matchesresume[2]}`;
+  const button = `<button><a href="${documentUrl}">Download Document</a></button>`;
+  const subject = `Applied Now Form`;
+  //const document_button = `<a href="${documentUrl}">Download Document</a>`;  
+  const body = `<table>
+    <tbody>
+    <tr>
+      <td><img src="https://static.wixstatic.com/media/286c06_918a4ac4247b49918db0cade1f7f1186~mv2.png" width="70px"></td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td><b>
+        Name: ${$w("#empname").value}</b></td> 
+      </td>
+    </tr>
+    <tr>
+      <td>\rEmail Adress: ${$w("#hiddenIdfield1").value}</td>
+    </tr>
+    <tr>
+      <td>\rPhone Number: ${+$w("#phonedropdown").value} ${$w("#empPhoneNumber").value}</td>
+    </tr>
+    <tr>
+      <td>\rExpected Salary: ${$w("#EXPsalary").value}</td>
+    </tr>
+    <tr>
+      <td>\rAddress: ${$w("#EMPaddress").value}</td>
+    </tr>
+    <tr>
+      <td>\rVaccination: ${$w("#vaccination").value}</td>
+    </tr>
+    <tr>
+      <td>\rFile: ${button}</td>
+    </tr>
+  </tbody>
+  </table>`;
+  //console.log(user.getEmail().then((email)=> $w('#hiddenIdfield1').value = email ));
+
+
+  const recipient = $w("#hiddenIdfield1").value; //apply user email address
+  const recipient1 = $w("#getCompanyEmail").text;//company email address
+  const nomcc = "";
+
+  sendEmailWithRecipient(subject, body, recipient, recipient1, nomcc)
+    .then(response => console.log(response)); 
+    
+     //sendEmail(subject, body,cmpEmail)
+   // .then(response => console.log(response));
+}
+
+// onclick event save the data in dataset
+export function applybtn_click(event) {
+  $w("#dataset1").setFieldValue("email", $w('#hiddenIdfield1').value);
+  $w("#dataset1").setFieldValue("url", $w('#text12').text);
+  // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
+  // Add your code for this event here: 
+}
+
+
+
+
+backend 
+
+//sendGrid.js
+
+import {fetch} from 'wix-fetch';  
+
+export function sendWithService(key, sender, recipient,recipient1, nomcc, subject, body,) {
+  const url = "https://api.sendgrid.com/api/mail.send.json";
+ 
+  const headers = {
+    "Authorization": "Bearer " + key,
+    "Content-Type": "application/x-www-form-urlencoded"
+  };
+
+  const data = `from=${sender}&to=${recipient}&to=${recipient1}&cc=${nomcc}&subject=${subject}&html=${body}&css=${body}`;
+ 
+  const request = {
+    "method": "post", 
+    "headers": headers, 
+    "body": data
+  };
+ 
+  return fetch(url, request)
+   .then(response => response.json());
+}
+
+
+
+
+//email.jsw
+
+import {sendWithService} from 'backend/sandGrid'; 
+
+export function sendEmail(subject, body) {
+  const key = "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";
+  const sender = "from.info@wixmywebsite.com";
+  const recipient = "to.akash.asodariya1@gmail.com";
+  return sendWithService(key, sender, recipient, subject, body);
+}
+
+export function sendEmailWithRecipient(subject, body, recipient, nomcc, recipient1) {
+  const key = "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";
+  const sender = "info@wixmywebsite.com";
+  return sendWithService(key, sender, recipient, recipient1, nomcc, subject, body);
+}
+
+
+
+
+
+====================================================================================
+all post filter page
+
+=========================================================================================
+
+import wixUsers from 'wix-users';
+import wixData from 'wix-data';
+import wixLocation from 'wix-location';
+// API Reference: https://www.wix.com/velo/reference/api-overview/introduction
+// “Hello, World!” Example: https://learn-code.wix.com/en/article/1-hello-world
+
+$w.onReady(function () {
+
+//let user = $w("#dataset1").getCurrentItem()
+//let id = user._id
+//console.log("user ID: ",id)
+
+let userEmail; 
+let user = wixUsers.currentUser;
+
+$w.onReady(async function () {
+ await user.getEmail()
+    .then( (email) => {
+        userEmail = email;     
+
+    });
+    console.log(userEmail);
+    $w('#loginemailuserid').value = userEmail;
+
+  let loginEmail = $w('#loginemailuserid').value;
+
+  $w("#dataset1").setFilter( wixData.filter()
+    .eq('email', loginEmail))
+
+    .then((results) => {
+           
+              console.log('email is ' + loginEmail)
+         const currentItem = $w("#dataset1").getCurrentItem();
+             //$w("#text11").text = currentItem.title;
+             //$w("#text12").text = currentItem.salary;
+        // using the wix location API,
+        // make sure you return the full destination URL 
+            
+            })
+    .catch((err) => {
+      console.log("err", err);
+    });
+});
+
+})
+
+
+/**
+* Adds an event handler that runs when the element is clicked.
+  [Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
+*  @param {$w.MouseEvent} event
+*/
+export function button1_click(event) {
+ const dataset = $w("#dataset1");
+  dataset.onReady(() => {
+    const { _id } = dataset.getCurrentItem();
+    console.log(_id);
+  });
+  // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
+  // Add your code for this event here: 
+}
+
+=========================================================================================================
+
+single post filter page
+
+=================================================================================
+
+import wixLocation from 'wix-location';
+import wixUsers from 'wix-users';
+import wixData from 'wix-data';
+// API Reference: https://www.wix.com/velo/reference/api-overview/introduction
+// “Hello, World!” Example: https://learn-code.wix.com/en/article/1-hello-world
+
+$w.onReady(function () {
+  // Write your JavaScript here
+
+  // To select an element by ID use: $w('#elementID')
+
+  // Click 'Preview' to run your code
+});
+let url;
+$w("#uploadButton1").startUpload()
+     .then( (uploadedFile) => {
+       url = uploadedFile.url;
+       console.log("Upload successful. File is available here:");
+       console.log(uploadedFile.url);
+      
+     } )
+
+export function button1_click(event) {
+    let toInsert = {
+        "photo": url
+    //console.log('dataset is updated');
+  // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
+      } // Add your code for this event here:
+        console.log('dataset is updated');
+        wixLocation.to("/account/userpost"); 
+}
+
+
+/**
+* Adds an event handler that runs when the element is clicked.
+  [Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
+*  @param {$w.MouseEvent} event
+*/
+export function Deletebtn_click(event) {
+  $w("#dynamicDataset").onReady( () => {
+    $w("#dynamicDataset").remove()
+      .then( () => {
+        console.log("Done removing current item");
+      } );
+    
+  } );
+
+ /*wixData.query("Team")
+.eq("_owner", wixData.)
+.find()
+.then((result)=>{
+ let ownerId = result.items[0]._owner;
+ wixData.remove("Team", ownerId)*/
+}
+
+
+
+export function dynamicDataset_ready() {
+
+    let isExistingRecord = $w("#dynamicDataset").getTotalCount();
+    if (!isExistingRecord) {
+        $w("#dynamicDataset").onReady(() => {
+            $w("#dynamicDataset").add()
+           
+        })
+    }
+}
+/**
+ *  Adds an event handler that runs just after a save.
+ */
+export function dynamicDataset_afterSave() {
+    $w("#dynamicDataset").refresh()
+
+        .then(() => {
+
+            console.log("current dataset size: " + $w("#dynamicDataset").getTotalCount());
+            $w('#input1').enable() 
+            $w('#imageX1').src
+            $w('#textBox1').enable()
+            $w('#input4').enable()
+            $w('#input3').enable()
+      $w('#button1').enable()
+
+        }); 
+}
+
+/**
+* Adds an event handler that runs when the element is clicked.
+  [Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
+*  @param {$w.MouseEvent} event
+*/
+
+
+/**
+ *  Adds an event handler that runs when the dataset is ready.
+ */
+export function dataset1_ready() {
+// or the name of your dataset
+
+  // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
+  // Add your code for this event here: 
+}
+
+
+==============================================================================
+
+single job page
+
+==============================================================================
+
+// API Reference: https://www.wix.com/velo/reference/api-overview/introduction
+// “Hello, World!” Example: https://learn-code.wix.com/en/article/1-hello-world
+import {session} from 'wix-storage';
+
+$w.onReady(function () {
+  // Write your JavaScript here
+
+  // To select an element by ID use: $w('#elementID')
+
+  // $w('#CompanyEmailCustomData').onMouseIn( function(){
+  //  console.log( $w('#CompanyEmailCustomData').text );
+  // } );
+  $w("#applynow").isVisible;
+  //var employer_email_id = $w('#CompanyEmail').text;
+
+  setTimeout( function(){
+    console.log( $w('#CompanyEmailText').text );
+    var employer_email_id = $w('#CompanyEmailText').text;
+    session.setItem("employer_email_id", employer_email_id);
+  }, 100 )
+
+
+  //session.setItem("employer_email_id", employer_email_id);
+
+
+  // $w('#getCompanyEmail').
+  
+
+  // Click 'Preview' to run your code
+  
+});
+
+
+
+
+
+//import {session} from 'wix-storage';
+import wixUsers from'wix-users';
+
+
+$w.onReady(function () {
+
+//console.log("#email", $w("#getCompanyEmail").text );
+//session.setItem( "employer_email_id", $w("#getCompanyEmail").text );
+
+
+
+const currentUser = wixUsers.currentUser;
+
+if (wixUsers.currentUser.loggedIn){ 
+
+       $w('#applynow').show();
+
+    }
+
+else
+
+    {
+
+     $w('#applynow').hide();
+
+       }
+
+
+})
+
+
+
+
+$w.onReady(function () {
+
+
+const currentUser = wixUsers.currentUser;
+
+if (wixUsers.currentUser.loggedIn){ 
+
+       $w('#text14').hide();
+
+    }
+
+else
+
+    {
+
+     $w('#text14').show();
+
+       }
+
+
+})
+
+
+
+==============================================================================================
+
+registrtion form 
+
+=======================================================================================
+
+import wixUsers from 'wix-users';
+import wixLocation from 'wix-location';
+import {assignRole} from 'backend/role';
+//send mail to the register email address user
+export function regnew_click(event) {
+  // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
+  // Add your code for this event here: 
+let email = $w("#regemail").value;
+let password = $w("#regpass").value;
+let first = $w("#fullname").value;
+
+wixUsers.register(email, password,{contactInfo:{
+  "firstName": first,
+}})
+  .then( (results) => {
+   let roleId="23ba52ff-998c-4022-8fa9-bab90e5e4d5a";//employer rol
+   //console.log(roleId);
+       assignRole(roleId, results.user.id);
+       
+     });
+}
+
+
+/**
+* Adds an event handler that runs when the element is clicked.
+  [Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
+*  @param {$w.MouseEvent} event
+*/
+export function loginmemberbtn_click(event) {
+  // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
+  // Add your code for this event here: 
+ 
+}
+
+
+=======================================================================
+
+login form 
+
+==============================================================================
+
+import wixUsers from 'wix-users';
+import wixLocation from 'wix-location';
+import wixWindow from 'wix-window';
+// API Reference: https://www.wix.com/velo/reference/api-overview/introduction
+// “Hello, World!” Example: https://learn-code.wix.com/en/article/1-hello-world
+
+$w.onReady(function () {
+  // Write your JavaScript here
+
+  // To select an element by ID use: $w('#elementID')
+
+  // Click 'Preview' to run your code
+});
+
+/**
+* Adds an event handler that runs when the element is clicked.
+  [Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
+*  @param {$w.MouseEvent} event
+*/
+
+/**
+* Adds an event handler that runs when the element is clicked.
+  [Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
+*  @param {$w.MouseEvent} event
+*/
+
+/**
+* Adds an event handler that runs when the element is clicked.
+  [Read more](https://www.wix.com/corvid/reference/$w.ClickableMixin.html#onClick)
+*  @param {$w.MouseEvent} event
+*/
+export function loginbtn123_click_1(event) {
+  let email = $w('#emailaddress123').value;
+     let password = $w('#password123').value;
+     
+     wixUsers.login(email,password)
+      .then( () =>{
+        console.log("Useris logged in");
+        wixLocation.to("/account/my-account");
+      })
+     .catch((err) => {
+     console.log("err", err);
+     } );
+  // This function was added from the Properties & Events panel. To learn more, visit http://wix.to/UcBnC-4
+  // Add your code for this event here: 
+}
+
+===========================================================================================
+
